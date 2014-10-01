@@ -3,9 +3,9 @@ Lecturer: [J. Quinn Norris](mailto:jqnorris@ucdavis.edu)
 TA: [Karen Y. Ng](mailto:karenyng@ucdavis.edu) 
 
 # Tasks to remind students to complete 
-- [] sign up for [Piazza](http://piazza.com/uc_davis/fall2014/phy102)
- which is our class forum 
-- [] check if computer account works in Phy room 106
+- [ ] sign up for [Piazza](http://piazza.com/uc_davis/fall2014/phy102)
+ which is our class forum / online office hour  
+- [ ] check if computer account works in Phy room 106
 
 # Lesson Plan
 ## Day 1  
