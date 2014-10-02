@@ -46,7 +46,7 @@ TA: [Karen Y. Ng](mailto:karenyng@ucdavis.edu)
 * Lecture : 11/04
 * Lab : 11/05, 11/06, 11/10 
 	* Stat. - line fitting, model fitting, least squares ... 
-	* How to generate (pseudo) random number from different probability distributions
+	* How to draw number from different probability distributions etc.
 
 ## Day 6 
 * Lecture : 11/11 
