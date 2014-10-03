@@ -1,0 +1,5 @@
+The escape velocity is 1.12e+04 m / s
+
+Mr. a is stuck on earth 
+Mr. c has barely enough energy to escape
+Mr. b has more than enough energy to fly out of earth
