@@ -49,12 +49,12 @@ def find_distance(x, function, args):
     Arguments
     ==========
     x = numpy array
-    function = a python function that computes our straight line model
+    function = a python function that takes and returns a numpy array
     args = list of variables that are the arguments for function
 
     Returns
     ======
-    numpy array that denotes the distance between data x and model
+    numpy array that denotes the distance between data x and and the function
     """
     # start your code here
     return None
