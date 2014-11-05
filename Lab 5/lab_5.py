@@ -28,7 +28,7 @@ def calc_stats(ticker):
     return None
 
 # Exercise 2
-def gaussian(x, mu, sigma)
+def gaussian(x, mu, sigma):
     """A python representation of a gaussian distribution with mean mu
     and standard deviation sigma
     
