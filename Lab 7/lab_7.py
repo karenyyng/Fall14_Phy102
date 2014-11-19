@@ -40,19 +40,20 @@ class my_flocking_sim:
         
         # Initialize the positions of the fish in cartesian cordinates (x,y)
         for i in xrange(size_of_school):
-            self.positions[0,i,0] = 20.*random()
-            self.positions[0,i,1] = 20.*random()
+            self.positions[0,i,0] = (19./np.sqrt(2.))*random() - 9.5/np.sqrt(2.)
+            self.positions[0,i,1] = (19./np.sqrt(2.))*random() - 9.5/np.sqrt(2.)
 
         # Initialize the velocities of the fish in polar cordinates (v, theta)
         for i in xrange(size_of_school):
-            self.velocities[0,i,0] = gauss(0.5, 0.025)
+            self.velocities[0,i,0] = 0.2
             self.velocities[0,i,1] = 2.* np.pi*random()
         
-        # Initializes the positions and velocity of a shark
-        self.shark_pos[0,0] = 20.*random()
-        self.shark_pos[0,1] = 20.*random()
+        # Initializes the position of the shark
+        self.shark_pos[0,0] = (19./np.sqrt(2.))*random() - 9.5/np.sqrt(2.)
+        self.shark_pos[0,1] = (19./np.sqrt(2.))*random() - 9.5/np.sqrt(2.)
         
-        self.shark_vel[0,0] = 0.15
+        # Initializes the velocity of the shark
+        self.shark_vel[0,0] = 0.05
         self.shark_vel[0,1] = 2.* np.pi*random()
 
     # This function obtains the new postions of the fish using their velocities
@@ -64,13 +65,15 @@ class my_flocking_sim:
         delta_x = self.velocities[time-1,:,0]*np.cos(self.velocities[time-1,:,1])
         delta_y = self.velocities[time-1,:,0]*np.sin(self.velocities[time-1,:,1])
         
+        
         # The new position coordinates are the old cordinates plus the changes
-        # in position. The %20 makes the positions wrap. If the fish swims
-        # off the right, it shows up on left. If the fish swims off the top
-        # it shows up on the bottom.
-        self.positions[time,:,0] = (self.positions[time-1,:,0] + delta_x)%20
-        self.positions[time,:,1] = (self.positions[time-1,:,1] + delta_y)%20
-    
+        # in position.        
+        self.positions[time,:,0] = self.positions[time-1,:,0] + delta_x
+        self.positions[time,:,1] = self.positions[time-1,:,1] + delta_y
+        
+        # Reset the updated array
+        self.already_updated = [False]*self.size_of_school
+           
     # This function updates the fish velocities. This function is what
     # determines the simulation.
     def step_fish_vel_to(self, time):
@@ -79,45 +82,53 @@ class my_flocking_sim:
         
         # Loop over fish indices
         for i in xrange(self.size_of_school):
-            # Because the edges wrap, we need to consider whether
-            # the fish is 'near' the shark on the opposite edge.
-            # Define an array of translation vectors.
-            vectors = np.array([[-20, -20], [-20, 0], [-20, 20],
+            
+            # This code turns the fish around at the edge of the tank
+            if np.linalg.norm(self.positions[time,i]) > 9.5:
+                position_angle = np.arctan2(self.positions[time,i,1], self.positions[time,i,0])
+                self.velocities[time,i,1] = 2.0*position_angle - self.velocities[time-1,i,1] + np.pi
+                self.already_updated[i] = True
+            
+            # If the fish has not had a colision with the edge of the tank
+            else:
+                # Because the edges wrap, we need to consider whether
+                # the fish is 'near' the shark on the opposite edge.
+                # Define an array of translation vectors.
+                vectors = np.array([[-20, -20], [-20, 0], [-20, 20],
                          [0, -20], [0, 0], [0, 20],
                          [20, -20], [20, 0], [20, 20]])
             
-            # Define a variable assuming the fish is not close to the shark
-            close = False
+                # Define a variable assuming the fish is not close to the shark
+                close = False
+           
+                # Loop over vectors
+                for vec in vectors:
+                    # Calculate the current distance from the shark
+                    delta = self.positions[time, i] - self.shark_pos[time-1]-vec
             
-            for vec in vectors:
-                # Calculate the current distance from the shark
-                delta = self.positions[time, i] - self.shark_pos[time-1]-vec
-            
-                # If the fish is near the shark
-                if np.linalg.norm(delta) < 4:
-                    # Set close to true
-                    close = True
-                    
-                    # Move away from the shark
-                    self.velocities[time,i,1] = np.arctan2(delta[1], delta[0])
-                    
-                    # Break out of for loop
-                    break
+                    # If the fish is near the shark
+                    if np.linalg.norm(delta) < 3:
+                        # Move away from the shark
+                        self.velocities[time,i,1] = np.arctan2(delta[1], delta[0])
+                        close = True
+                        
+                        # Break out of for loop
+                        break
                 
-            if not close:
-                #       THIS IS THE BLOCK OF CODE YOU NEED TO CHANGE
-                #
-                # When not near a shark the fish just swim in straigth lines.
-                # This is not flocking behavoir. The goal of this week's
-                # exercise is for you to come up with a rule for how the
-                # fish change their velocities over time. Once you have an
-                # idea for a rule, code it up and see what happens. If it
-                # looks like flocking, you are done. If not, try a new rule
-                # until you get something that looks like flocking. You know
-                # you have flocking behavoir if the fish behave like a single
-                # organism.
-                
-                self.velocities[time,i,1] = self.velocities[time-1,i,1]     
+                if not close:
+                    #       THIS IS THE BLOCK OF CODE YOU NEED TO CHANGE
+                    #
+                    # When not near a shark the fish just swim in straigth lines.
+                    # This is not flocking behavoir. The goal of this week's
+                    # exercise is for you to come up with a rule for how the
+                    # fish change their velocities over time. Once you have an
+                    # idea for a rule, code it up and see what happens. If it
+                    # looks like flocking, you are done. If not, try a new rule
+                    # until you get something that looks like flocking. You know
+                    # you have flocking behavoir if the fish behave like a single
+                    # organism.
+
+                    self.velocities[time,i,1] = self.velocities[time-1,i,1]
     
     # This function updtates the position of the shark
     def step_shark_pos_to(self, time):
@@ -129,19 +140,22 @@ class my_flocking_sim:
         delta_y = self.shark_vel[time-1, 0]*np.sin(self.shark_vel[time-1, 1])
         
         # The new position coordinates are the old cordinates plus the changes
-        # in position. The %20 makes the positions wrap. If the shark swims
-        # off the right, it shows up on left. If the shark swims off the top
-        # it shows up on the bottom.
-        self.shark_pos[time,0] = (self.shark_pos[time-1,0] + delta_x)%20
-        self.shark_pos[time,1] = (self.shark_pos[time-1,1] + delta_y)%20
+        # in position.
+        self.shark_pos[time,0] = self.shark_pos[time-1,0] + delta_x
+        self.shark_pos[time,1] = self.shark_pos[time-1,1] + delta_y
         
     # This function updates the velocity of the shark
     def step_shark_vel_to(self, time):
         # The magnitude of the shark velocity remains unchanged
         self.shark_vel[time, 0] = self.shark_vel[time-1, 0]
         
+        # This code turns the shark around at the edge of the tank
+        if np.linalg.norm(self.shark_pos[time]) > 9.5:
+            position_angle = np.arctan2(self.shark_pos[time,1], self.shark_pos[time,0])
+            self.shark_vel[time,1] = 2.0*position_angle - self.shark_vel[time-1,1] + np.pi        
+        
         # The shark will randomly change directions
-        if random() > 0.95:
+        elif random() > 0.95:
             self.shark_vel[time, 1] = self.shark_vel[time-1, 1] + 0.25*np.pi*(random() - 1)
         else:
             self.shark_vel[time, 1] = self.shark_vel[time-1, 1]
@@ -165,8 +179,11 @@ class my_flocking_sim:
     # Function to create an animation of the simulation
     def animate_sim(self):
         fig = plt.figure(figsize=(8,8))
-        ax = fig.add_axes((0.05, 0.05, 0.9, 0.9), xlim=(0, 20), ylim=(0,20),
+        ax = fig.add_axes((0.05, 0.05, 0.9, 0.9), xlim=(-10.1, 10.1), ylim=(-10.1, 10.1),
                           autoscale_on=False, aspect='equal', xticks=[], yticks=[])
+        
+        circ = plt.Circle((0,0), radius=10, color='black', fill=False)
+        fig.gca().add_artist(circ)
 
         self.fish_dots = ax.scatter([], [], c='cyan')
         self.shark_dot = ax.scatter([], [], c='red', s=150)
